@@ -323,10 +323,14 @@ JS.mixin(CCLoader.prototype, {
             cc.warnID(4800, assetOrUrlOrUuid);
             return key;
         }
-        _info.url = null;
-        _info.raw = false;
-        cc.AssetLibrary._getAssetInfoInRuntime(key, _info);
-        return this._cache[_info.url] ? _info.url : key;
+        var isUuid = cc.AssetLibrary._getAssetUrl(key);
+        if (isUuid) {
+            _info.url = null;
+            _info.raw = false;
+            cc.AssetLibrary._getAssetInfoInRuntime(key, _info);
+            key = _info.url;
+        }
+        return key;
     },
 
     /**
@@ -600,12 +604,12 @@ JS.mixin(CCLoader.prototype, {
             if (item) {
                 var removed = this.removeItem(id);
                 asset = item.content;
-                // TODO: AUDIO
                 if (asset instanceof cc.Asset) {
                     if (CC_JSB && asset instanceof cc.SpriteFrame && removed) {
                         // for the "Temporary solution" in deserialize.js
                         asset.release();
                     }
+                    // Audio
                     var urls = asset.rawUrls;
                     for (var i = 0; i < urls.length; i++) {
                         this.release(urls[i]);
